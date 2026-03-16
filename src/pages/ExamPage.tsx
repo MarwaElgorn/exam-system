@@ -1,9 +1,10 @@
+import MainLayout from "../features/layout/components/MainLayout";
+import ExamContainer from "../features/exam/containers/ExamContainer";
 
-import MainLayout from '../features/layout/components/MainLayout'
 export default function ExamPage() {
   return (
-      <MainLayout>
-      exam content
+    <MainLayout>
+      <ExamContainer />
     </MainLayout>
-  )
+  );
 }
