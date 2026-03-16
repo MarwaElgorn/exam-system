@@ -1,20 +1,20 @@
-export interface AnswerOption {
+export interface AnswerOptionDto {
   text: string;
   order: number;
 }
 
-export interface ExamQuestion {
+export interface ExamQuestionDto {
   questionId: string;
   title: string;
   points: number;
   sortOrder: number;
   type: number;
-  answerOptions: AnswerOption[];
+  answerOptions: AnswerOptionDto[];
 }
 
-export type ExamQuestionsResponse = ExamQuestion[];
+export type ExamQuestionsResponse = ExamQuestionDto[];
 
-export interface ExamMeta {
+export interface ExamMetaDto {
   id: string;
   title: string;
   semesterCourseId: string;
@@ -30,7 +30,28 @@ export interface ExamMeta {
   questionsCount: number;
 }
 
-export interface StudentAttendance {
+export interface ExamAnswer {
+  text: string;
+  order: number;
+}
+
+export interface ExamQuestion {
+  id: string;
+  title: string;
+  order: number;
+  type: number;
+  options: ExamAnswer[];
+}
+
+export interface ExamModel {
+  id: string;
+  title: string;
+  semesterName: string;
+  durationMinutes: number;
+  questions: ExamQuestion[];
+}
+
+export interface StudentAttendanceDto {
   examAttendanceId: string;
   endDateUtc: string;
 }

@@ -1,13 +1,15 @@
-import  { apiClient } from "../../../services/api.client";
+import { apiClient } from "../../../services/api.client";
 
 import type {
-  ExamMeta,
+  ExamMetaDto,
+  ExamModel,
+  ExamQuestionDto,
   ExamQuestionsResponse,
-  StudentAttendance,
+  StudentAttendanceDto,
 } from "../types";
 
 export const examRepository = {
-  async getExamMeta(examId: string): Promise<ExamMeta> {
+  async getExamMeta(examId: string): Promise<ExamMetaDto> {
     const response = await apiClient.get(`/api/v1/exams/${examId}`);
     return response.data;
   },
@@ -19,10 +21,31 @@ export const examRepository = {
     return response.data;
   },
 
-  async startExam(examId: string): Promise<StudentAttendance> {
+  async startExam(examId: string): Promise<StudentAttendanceDto> {
     const response = await apiClient.post(
       `/api/v1/exams/${examId}/student-attendance`
     );
     return response.data;
+  },
+
+  async getExam(examId: string): Promise<ExamModel> {
+    const [meta, questions] = await Promise.all([
+      this.getExamMeta(examId),
+      this.getQuestions(examId),
+    ]);
+
+    return {
+      id: meta.id,
+      title: meta.title,
+      semesterName: meta.semesterName,
+      durationMinutes: meta.durationMinutes,
+      questions: questions.map((question: ExamQuestionDto) => ({
+        id: question.questionId,
+        title: question.title,
+        order: question.sortOrder,
+        type: question.type,
+        options: question.answerOptions,
+      })),
+    };
   },
 };
