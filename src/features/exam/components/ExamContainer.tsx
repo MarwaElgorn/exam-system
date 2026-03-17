@@ -1,5 +1,6 @@
-import { useMemo } from "react";
+import { useMemo, useCallback, useRef } from "react";
 import { useStudentExam } from "../hooks/useStudentExam";
+import { useSubmitExam } from "../hooks/useSubmitExam";
 import { useAnswers } from "../hooks/useAnswers";
 import { useTimer } from "../hooks/useTimer";
 import { QuestionType } from "../types";
@@ -18,8 +19,24 @@ export default function ExamContainer({ userId }: ExamContainerProps) {
 
   const { answers, selectAnswer, getSelectedOrders, allAnswered, answeredCount } = useAnswers(questions);
 
-  // Pass 0 while exam is loading — timer won't start until real value arrives
-  const timer = useTimer(exam?.meta.durationMinutes ?? 0);
+  const { submit, isSubmitting, isSubmitted, submitError } = useSubmitExam({
+    examId: exam?.meta.id ?? "",
+    attendanceId: exam?.attendance.attendanceId ?? "",
+    onSuccess: () => console.log("Submitted"),
+    onError: (err) => console.error(err.message),
+  });
+
+  // Ref pattern: stable timer callback that always sees latest answers
+  const liveRef = useRef({ submit, isSubmitted, answers });
+  liveRef.current = { submit, isSubmitted, answers };
+
+  const handleTimeExpired = useCallback(() => {
+    const { submit: s, isSubmitted: done, answers: a } = liveRef.current;
+    if (!done) s(a);
+  }, []);
+
+  const endDateUtc = exam?.attendance.endDateUtc ?? new Date(Date.now() + 60_000).toISOString();
+  const timer = useTimer(endDateUtc, handleTimeExpired);
 
   const questionsByType = useMemo(() => {
     const groups: Record<number, typeof questions> = {};
@@ -33,13 +50,13 @@ export default function ExamContainer({ userId }: ExamContainerProps) {
   if (isLoading) return (
     <div className="exam-state exam-state--loading">
       <div className="exam-state__spinner" />
-      <p>Loading exam...</p>
+      <p>جاري تحميل الاختبار...</p>
     </div>
   );
 
   if (isError) return (
     <div className="exam-state exam-state--error" role="alert">
-      <p>Failed to load exam</p>
+      <p>حدث خطأ أثناء تحميل الاختبار</p>
       {error && <p className="exam-state__detail">{error.message}</p>}
     </div>
   );
@@ -49,8 +66,6 @@ export default function ExamContainer({ userId }: ExamContainerProps) {
   return (
     <div className="exam-container" dir="rtl">
       <ExamHeader title={exam.meta.title} semesterName={exam.meta.semesterName} />
-
-      {/* Only render timer after exam is loaded and durationMinutes is known */}
       <TimerCircle display={timer.display} isExpired={timer.isExpired} />
 
       <div className="exam-container__sections">
@@ -60,8 +75,7 @@ export default function ExamContainer({ userId }: ExamContainerProps) {
           return (
             <QuestionSection
               key={type} type={type} questions={qs}
-              getSelectedOrders={getSelectedOrders}
-              onSelect={selectAnswer}
+              getSelectedOrders={getSelectedOrders} onSelect={selectAnswer}
             />
           );
         })}
@@ -69,15 +83,17 @@ export default function ExamContainer({ userId }: ExamContainerProps) {
 
       {questions.length > 0 && (
         <p className="exam-container__progress">
-          {answeredCount} / {questions.length} questions answered
+          {answeredCount} / {questions.length} سؤال تمت الإجابة عليه
         </p>
       )}
 
+      {submitError && <div className="exam-error-banner" role="alert">فشل الإرسال — يرجى المحاولة مرة أخرى</div>}
+
       <SubmitButton
-        onClick={() => console.log("Submit answers:", answers)}
-        isSubmitting={false}
-        isSubmitted={false}
-        disabled={!allAnswered || timer.isExpired}
+        onClick={() => submit(answers)}
+        isSubmitting={isSubmitting}
+        isSubmitted={isSubmitted}
+        disabled={!exam || !allAnswered || timer.isExpired || isSubmitted}
       />
     </div>
   );

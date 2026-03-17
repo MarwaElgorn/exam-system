@@ -1,10 +1,7 @@
-import MainLayout from "../features/layout/components/MainLayout";
 import ExamContainer from "../features/exam/containers/ExamContainer";
 
-export default function ExamPage() {
-  return (
-    <MainLayout>
-      <ExamContainer />
-    </MainLayout>
-  );
+interface ExamPageProps { userId: string; }
+
+export default function ExamPage({ userId }: ExamPageProps) {
+  return <main className="exam-page"><ExamContainer userId={userId} /></main>;
 }
