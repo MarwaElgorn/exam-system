@@ -2,7 +2,7 @@ import axios from "axios";
 import { getToken } from "../shared/utils/auth";
 
 export const apiClient = axios.create({
-  baseURL: "",
+  baseURL: "https://api.manahilalilm.sa",
   headers: { "Content-Type": "application/json" },
 });
 
