@@ -1,6 +1,6 @@
 import type {
-  ExamMetaDto, StudentAttendanceDto, ExamQuestionWithAnswersDto,
-  ExamMetaModel, ExamAttendanceModel, ExamQuestionModel,
+  ExamMetaDto, ExamQuestionWithAnswersDto,
+  ExamMetaModel, ExamQuestionModel,
   AnswerMap, SubmitExamRequestDto,
 } from "../types";
 import { QuestionType } from "../types";
@@ -12,13 +12,6 @@ export function mapExamMetaDto(dto: ExamMetaDto): ExamMetaModel {
     semesterName: dto.semesterName,
     durationMinutes: dto.durationMinutes,
     passingScore: dto.passingScore,
-  };
-}
-
-export function mapAttendanceDto(dto: StudentAttendanceDto): ExamAttendanceModel {
-  return {
-    attendanceId: dto.examAttendanceId,
-    endDateUtc: dto.endDateUtc,
   };
 }
 

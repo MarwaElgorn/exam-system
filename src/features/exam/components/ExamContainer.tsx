@@ -21,9 +21,9 @@ export default function ExamContainer({ userId }: ExamContainerProps) {
 
   const { submit, isSubmitting, isSubmitted, submitError } = useSubmitExam({
     examId: exam?.meta.id ?? "",
-    attendanceId: exam?.attendance.attendanceId ?? "",
+    attendanceId: "",
     onSuccess: () => console.log("Submitted"),
-    onError: (err) => console.error(err.message),
+    onError: (err: Error) => console.error(err.message),
   });
 
   // Ref pattern: stable timer callback that always sees latest answers
@@ -35,8 +35,7 @@ export default function ExamContainer({ userId }: ExamContainerProps) {
     if (!done) s(a);
   }, []);
 
-  const endDateUtc = exam?.attendance.endDateUtc ?? new Date(Date.now() + 60_000).toISOString();
-  const timer = useTimer(endDateUtc, handleTimeExpired);
+  const timer = useTimer(exam?.meta.durationMinutes ?? 0, handleTimeExpired);
 
   const questionsByType = useMemo(() => {
     const groups: Record<number, typeof questions> = {};

@@ -1,5 +1,5 @@
-import axios from "axios";
 import { jwtDecode } from "jwt-decode";
+import { apiClient } from "../../services/api.client";
 
 interface TokenPayload {
   sub: string;
@@ -12,14 +12,7 @@ const CREDENTIALS = {
   deviceId: "web-app",
 } as const;
 
-// ── IMPORTANT: Find the real login URL in Swagger and update this ──────────
-// Common patterns to try if current one gives 404:
-//   /api/v1/Auth/Login
-//   /api/v1/Account/Login
-//   /api/v1/Identity/login
-//   /api/v1/Users/login
 const LOGIN_URL = "/api/v1/users/login";
-// ─────────────────────────────────────────────────────────────────────────────
 
 export function getToken(): string | null {
   return localStorage.getItem("token");
@@ -42,7 +35,7 @@ export async function ensureToken(): Promise<string> {
   const stored = getToken();
   if (stored && isTokenValid(stored)) return stored;
 
-  const response = await axios.post<{ accessToken: string }>(
+  const response = await apiClient.post<{ accessToken: string }>(
     LOGIN_URL,
     CREDENTIALS
   );
