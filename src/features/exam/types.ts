@@ -1,7 +1,7 @@
 // ── LAYER 1: RAW API DTOs ────────────────────────────────────────────────────
 
 export interface ExamListItemDto {
-  examId: string;        // list uses "examId" (NOT "id")
+  examId: string; // list uses "examId" (NOT "id")
   title: string;
   semesterName: string;
   durationMinutes: number;
@@ -15,7 +15,7 @@ export interface ExamListResponseDto {
 }
 
 export interface ExamMetaDto {
-  id: string;            // single exam uses "id" (NOT "examId")
+  id: string; // single exam uses "id" (NOT "examId")
   title: string;
   semesterName: string;
   durationMinutes: number;

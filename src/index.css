@@ -4,12 +4,12 @@
    BASE SETUP
    ============================================================ */
 @layer base {
-html,
-body {
-  @apply bg-slate-50 min-h-screen;
-  font-family: var(--font-arabic);
-  direction: rtl;
-} 
+  html,
+  body {
+    @apply bg-slate-50 min-h-screen;
+    font-family: var(--font-arabic);
+    direction: rtl;
+  }
 }
 
 /* ============================================================

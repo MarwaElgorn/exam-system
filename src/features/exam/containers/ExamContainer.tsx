@@ -62,9 +62,7 @@ export default function ExamContainer({ userId }: ExamContainerProps) {
       >
         <p>Failed to load exam</p>
         {error && (
-          <p className="text-xs text-gray-500 max-w-sm">
-            {error.message}
-          </p>
+          <p className="text-xs text-gray-500 max-w-sm">{error.message}</p>
         )}
       </div>
     );

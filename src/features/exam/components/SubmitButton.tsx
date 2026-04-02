@@ -20,13 +20,13 @@ export default function SubmitButton({
     <div className="fixed bottom-0 left-0 right-0 px-6 py-4 bg-white border-t border-gray-200 flex justify-center z-50">
       <button
         type="button"
-        className={`w-full max-w-3xl px-6 py-4 rounded-md font-bold text-white font-[Segoe_UI,Tahoma,Arial,sans-serif] transition-all duration-200 tracking-wide ${
-          isSubmitted
-            ? "bg-submit-done shadow-lg"
-            : disabled || isSubmitting
-              ? "bg-submit-disabled cursor-not-allowed"
-              : "bg-submit-bg hover:bg-submit-hover shadow-submit"
-        }`}
+   className={`w-full max-w-3xl px-6 py-4 rounded-lg font-semibold text-white transition ${
+  isSubmitted
+    ? "bg-green-600"
+    : disabled || isSubmitting
+      ? "bg-gray-400 cursor-not-allowed"
+      : "bg-blue-600 hover:bg-blue-700"
+}`}
         onClick={onClick}
         disabled={disabled || isSubmitting || isSubmitted}
       >
