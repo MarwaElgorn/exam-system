@@ -17,6 +17,7 @@ interface ExamContainerProps {
 
 export default function ExamContainer({ userId }: ExamContainerProps) {
   const { exam, isLoading, isError, error } = useStudentExam(userId);
+
   const questions = useMemo(() => {
     return exam?.questions ?? [];
   }, [exam]);
@@ -31,18 +32,13 @@ export default function ExamContainer({ userId }: ExamContainerProps) {
 
   const { submit, isSubmitting, isSubmitted, submitError } = useSubmitExam({
     examId: exam?.meta.id ?? "",
-    attendanceId: "",
-    onSuccess: () => console.log("Submitted"),
-    onError: (err: Error) => console.error(err.message),
   });
 
-  // Ref pattern: stable timer callback that always sees latest answers
+  const liveRef = useRef({ submit, isSubmitted, answers });
 
-const liveRef = useRef({ submit, isSubmitted, answers });
-
-useEffect(() => {
-  liveRef.current = { submit, isSubmitted, answers };
-}, [submit, isSubmitted, answers]);
+  useEffect(() => {
+    liveRef.current = { submit, isSubmitted, answers };
+  }, [submit, isSubmitted, answers]);
 
   const handleTimeExpired = useCallback(() => {
     const { submit: s, isSubmitted: done, answers: a } = liveRef.current;
@@ -80,16 +76,25 @@ useEffect(() => {
 
   return (
     <div className="exam-container" dir="rtl">
+
+      {exam.hasExpired && (
+        <div className="bg-red-100 text-red-600 px-4 py-2 rounded text-center w-full">
+          الامتحان انتهى
+        </div>
+      )}
+
       <ExamHeader
         title={exam.meta.title}
         semesterName={exam.meta.semesterName}
       />
+
       <TimerCircle display={timer.display} isExpired={timer.isExpired} />
 
       <div className="exam-container__sections">
         {SECTION_ORDER.map((type) => {
           const qs = questionsByType[type];
           if (!qs?.length) return null;
+
           return (
             <QuestionSection
               key={type}
@@ -118,7 +123,13 @@ useEffect(() => {
         onClick={() => submit(answers)}
         isSubmitting={isSubmitting}
         isSubmitted={isSubmitted}
-        disabled={!exam || !allAnswered || timer.isExpired || isSubmitted}
+        disabled={
+          !exam ||
+          !allAnswered ||
+          timer.isExpired ||
+          isSubmitted ||
+          exam.hasExpired
+        }
       />
     </div>
   );
