@@ -7,6 +7,7 @@ export interface ExamListItemDto {
   durationMinutes: number;
   passingScore: number;
   isActive: boolean;
+  hasExpired: boolean;
 }
 
 export interface ExamListResponseDto {
@@ -82,10 +83,11 @@ export interface ExamMetaModel {
   passingScore: number;
 }
 
-// ExamModel no longer needs attendance
+// ExamModel combines meta, questions, and exam list state
 export interface ExamModel {
   meta: ExamMetaModel;
   questions: ExamQuestionModel[];
+  hasExpired: boolean;
 }
 
 // ── LAYER 3: UI STATE ────────────────────────────────────────────────────────

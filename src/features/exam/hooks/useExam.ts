@@ -1,14 +1,22 @@
-import { useQuery} from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { examRepository } from "../repositories/exam.repository";
-import { mapExamMetaDto, mapQuestionWithAnswersDtoList } from "../utils/exam.mappers";
-import type { ExamModel } from "../types";
+import {
+  mapExamMeta,
+  mapQuestionWithAnswersDtoList,
+} from "../utils/exam.mappers";
+import type { ExamMetaModel, ExamQuestionModel } from "../types";
+
+interface ExamPartial {
+  meta: ExamMetaModel;
+  questions: ExamQuestionModel[];
+}
 
 export function useExam(examId: string) {
   // meta + questions fire IN PARALLEL — both enabled as soon as examId exists
   const metaQuery = useQuery({
     queryKey: ["exam-meta", examId],
-    queryFn: async () => mapExamMetaDto(await examRepository.getExamMeta(examId)),
+    queryFn: async () => mapExamMeta(await examRepository.getExamMeta(examId)),
     enabled: !!examId,
     staleTime: Infinity,
     retry: 2,
@@ -16,13 +24,14 @@ export function useExam(examId: string) {
 
   const questionsQuery = useQuery({
     queryKey: ["exam-questions", examId],
-    queryFn: async () => mapQuestionWithAnswersDtoList(await examRepository.getQuestions(examId)),
+    queryFn: async () =>
+      mapQuestionWithAnswersDtoList(await examRepository.getQuestions(examId)),
     enabled: !!examId, // ← same condition as meta, fires at the same time
     staleTime: Infinity,
     retry: 2,
   });
 
-  const exam = useMemo<ExamModel | undefined>(() => {
+  const exam = useMemo<ExamPartial | undefined>(() => {
     if (!metaQuery.data || !questionsQuery.data) return undefined;
     return { meta: metaQuery.data, questions: questionsQuery.data };
   }, [metaQuery.data, questionsQuery.data]);

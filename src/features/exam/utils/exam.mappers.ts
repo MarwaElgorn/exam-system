@@ -1,11 +1,14 @@
 import type {
-  ExamMetaDto, ExamQuestionWithAnswersDto,
-  ExamMetaModel, ExamQuestionModel,
-  AnswerMap, SubmitExamRequestDto,
+  ExamMetaDto,
+  ExamQuestionWithAnswersDto,
+  ExamMetaModel,
+  ExamQuestionModel,
+  AnswerMap,
+  SubmitExamRequestDto,
 } from "../types";
 import { QuestionType } from "../types";
 
-export function mapExamMetaDto(dto: ExamMetaDto): ExamMetaModel {
+export function mapExamMeta(dto: ExamMetaDto): ExamMetaModel {
   return {
     id: dto.id,
     title: dto.title,
@@ -14,8 +17,9 @@ export function mapExamMetaDto(dto: ExamMetaDto): ExamMetaModel {
     passingScore: dto.passingScore,
   };
 }
-
-export function mapQuestionWithAnswersDtoList(dtos: ExamQuestionWithAnswersDto[]): ExamQuestionModel[] {
+export function mapQuestionWithAnswersDtoList(
+  dtos: ExamQuestionWithAnswersDto[],
+): ExamQuestionModel[] {
   const knownTypes = Object.values(QuestionType) as number[];
   return [...dtos]
     .sort((a, b) => a.sortOrder - b.sortOrder)
@@ -23,7 +27,9 @@ export function mapQuestionWithAnswersDtoList(dtos: ExamQuestionWithAnswersDto[]
       id: dto.questionId,
       title: dto.title,
       sortOrder: dto.sortOrder,
-      type: (knownTypes.includes(dto.type) ? dto.type : QuestionType.MultipleChoice) as QuestionType,
+      type: (knownTypes.includes(dto.type)
+        ? dto.type
+        : QuestionType.MultipleChoice) as QuestionType,
       options: [...dto.answerOptions]
         .sort((a, b) => a.order - b.order)
         .map((opt) => ({ text: opt.text, order: opt.order })),
@@ -32,9 +38,11 @@ export function mapQuestionWithAnswersDtoList(dtos: ExamQuestionWithAnswersDto[]
 
 export function buildSubmitPayload(answerMap: AnswerMap): SubmitExamRequestDto {
   return {
-    studentAnswers: Object.entries(answerMap).map(([questionId, selectedOptionOrders]) => ({
-      questionId,
-      selectedOptionOrders,
-    })),
+    studentAnswers: Object.entries(answerMap).map(
+      ([questionId, selectedOptionOrders]) => ({
+        questionId,
+        selectedOptionOrders,
+      }),
+    ),
   };
 }

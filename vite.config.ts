@@ -10,6 +10,7 @@ export default defineConfig({
         target: "https://api.manahilalilm.sa",
         changeOrigin: true,
         secure: false,
+        rewrite: (path) => path.replace(/^\/api/, ""),
       },
     },
   },

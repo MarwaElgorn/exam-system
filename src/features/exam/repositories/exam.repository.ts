@@ -31,8 +31,12 @@ export const examRepository = {
     return res.data;
   },
 
-  // PUT /api/v1/exams/{examId}/student-attendance/{attendanceId}  →  submit answers
-  // (kept for when attendance flow is added back)
+async createAttendance(examId: string) {
+  const res = await apiClient.post(
+    `/api/v1/exams/${examId}/student-attendance`
+  );
+  return res.data;
+},
   async submitAnswers(examId: string, attendanceId: string, body: SubmitExamRequestDto): Promise<void> {
     await apiClient.put(
       `/api/v1/exams/${examId}/student-attendance/${attendanceId}`,

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { examRepository } from "../repositories/exam.repository";
 import { useExam } from "./useExam";
-import type { ExamListItemDto } from "../types";
+import type { ExamListItemDto, ExamModel } from "../types";
 
 export function useStudentExam(userId: string | null) {
   const examListQuery = useQuery({
@@ -11,7 +11,8 @@ export function useStudentExam(userId: string | null) {
       const list: ExamListItemDto[] = Array.isArray(response)
         ? (response as unknown as ExamListItemDto[])
         : (response.data ?? []);
-      if (list.length === 0) throw new Error("No exam available for this student");
+      if (list.length === 0)
+        throw new Error("No exam available for this student");
       return list[0];
     },
     enabled: !!userId,
@@ -23,8 +24,18 @@ export function useStudentExam(userId: string | null) {
   const examId = examListQuery.data?.examId ?? "";
   const examResult = useExam(examId);
 
+  // Combine data from list + meta + questions into single ExamModel
+  const exam: ExamModel | undefined =
+    examListQuery.data && examResult.exam
+      ? {
+          meta: examResult.exam.meta,
+          questions: examResult.exam.questions,
+          hasExpired: examListQuery.data.hasExpired,
+        }
+      : undefined;
+
   return {
-    exam: examResult.exam,
+    exam,
     isLoading: examListQuery.isLoading || examResult.isLoading,
     isError: examListQuery.isError || examResult.isError,
     error: (examListQuery.error ?? examResult.error) as Error | null,

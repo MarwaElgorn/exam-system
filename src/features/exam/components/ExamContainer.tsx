@@ -1,4 +1,4 @@
-import { useMemo, useCallback, useRef } from "react";
+import { useMemo, useCallback, useRef, useEffect } from "react";
 import { useStudentExam } from "../hooks/useStudentExam";
 import { useSubmitExam } from "../hooks/useSubmitExam";
 import { useAnswers } from "../hooks/useAnswers";
@@ -11,13 +11,23 @@ import SubmitButton from "../components/SubmitButton";
 
 const SECTION_ORDER = [QuestionType.TrueFalse, QuestionType.MultipleChoice];
 
-interface ExamContainerProps { userId: string; }
+interface ExamContainerProps {
+  userId: string;
+}
 
 export default function ExamContainer({ userId }: ExamContainerProps) {
   const { exam, isLoading, isError, error } = useStudentExam(userId);
-  const questions = exam?.questions ?? [];
+  const questions = useMemo(() => {
+    return exam?.questions ?? [];
+  }, [exam]);
 
-  const { answers, selectAnswer, getSelectedOrders, allAnswered, answeredCount } = useAnswers(questions);
+  const {
+    answers,
+    selectAnswer,
+    getSelectedOrders,
+    allAnswered,
+    answeredCount,
+  } = useAnswers(questions);
 
   const { submit, isSubmitting, isSubmitted, submitError } = useSubmitExam({
     examId: exam?.meta.id ?? "",
@@ -27,8 +37,12 @@ export default function ExamContainer({ userId }: ExamContainerProps) {
   });
 
   // Ref pattern: stable timer callback that always sees latest answers
-  const liveRef = useRef({ submit, isSubmitted, answers });
+
+const liveRef = useRef({ submit, isSubmitted, answers });
+
+useEffect(() => {
   liveRef.current = { submit, isSubmitted, answers };
+}, [submit, isSubmitted, answers]);
 
   const handleTimeExpired = useCallback(() => {
     const { submit: s, isSubmitted: done, answers: a } = liveRef.current;
@@ -46,25 +60,30 @@ export default function ExamContainer({ userId }: ExamContainerProps) {
     return groups;
   }, [questions]);
 
-  if (isLoading) return (
-    <div className="exam-state exam-state--loading">
-      <div className="exam-state__spinner" />
-      <p>جاري تحميل الاختبار...</p>
-    </div>
-  );
+  if (isLoading)
+    return (
+      <div className="exam-state exam-state--loading">
+        <div className="exam-state__spinner" />
+        <p>جاري تحميل الاختبار...</p>
+      </div>
+    );
 
-  if (isError) return (
-    <div className="exam-state exam-state--error" role="alert">
-      <p>حدث خطأ أثناء تحميل الاختبار</p>
-      {error && <p className="exam-state__detail">{error.message}</p>}
-    </div>
-  );
+  if (isError)
+    return (
+      <div className="exam-state exam-state--error" role="alert">
+        <p>حدث خطأ أثناء تحميل الاختبار</p>
+        {error && <p className="exam-state__detail">{error.message}</p>}
+      </div>
+    );
 
   if (!exam) return null;
 
   return (
     <div className="exam-container" dir="rtl">
-      <ExamHeader title={exam.meta.title} semesterName={exam.meta.semesterName} />
+      <ExamHeader
+        title={exam.meta.title}
+        semesterName={exam.meta.semesterName}
+      />
       <TimerCircle display={timer.display} isExpired={timer.isExpired} />
 
       <div className="exam-container__sections">
@@ -73,8 +92,11 @@ export default function ExamContainer({ userId }: ExamContainerProps) {
           if (!qs?.length) return null;
           return (
             <QuestionSection
-              key={type} type={type} questions={qs}
-              getSelectedOrders={getSelectedOrders} onSelect={selectAnswer}
+              key={type}
+              type={type}
+              questions={qs}
+              getSelectedOrders={getSelectedOrders}
+              onSelect={selectAnswer}
             />
           );
         })}
@@ -86,7 +108,11 @@ export default function ExamContainer({ userId }: ExamContainerProps) {
         </p>
       )}
 
-      {submitError && <div className="exam-error-banner" role="alert">فشل الإرسال — يرجى المحاولة مرة أخرى</div>}
+      {submitError && (
+        <div className="exam-error-banner" role="alert">
+          فشل الإرسال — يرجى المحاولة مرة أخرى
+        </div>
+      )}
 
       <SubmitButton
         onClick={() => submit(answers)}
